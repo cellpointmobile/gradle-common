@@ -1,0 +1,37 @@
+/**
+ * Copyright (c) 2023. Cellpoint Digital
+ * www.cellpointdigital.com
+ *
+ */
+
+dependencies {
+    constraints {
+        def rules = {
+            version {
+                strictly("[2.20.0, 3[")
+                prefer("2.20.0")
+            }
+        }
+        implementation("org.apache.logging.log4j:log4j-core", rules)
+        implementation("org.apache.logging.log4j:log4j-api", rules)
+        implementation("org.apache.logging.log4j:log4j-to-slf4j", rules)
+
+        def rulesGuava = {
+            version {
+                strictly("32.1.2-jre")
+            }
+        }
+        implementation("com.google.guava:guava", rulesGuava)
+    }
+
+    modules {
+        module("com.google.guava:listenablefuture") {
+            replacedBy("com.google.guava:guava", "listenablefuture is part of guava")
+        }
+    }
+
+}
+
+configurations {
+    runtime.exclude name: "slf4j-log4j12"
+}

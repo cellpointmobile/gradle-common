@@ -1,0 +1,38 @@
+/**
+ * Copyright (c) 2023. Cellpoint Digital
+ * www.cellpointdigital.com
+ *
+ */
+
+apply plugin: "com.gorylenko.gradle-git-properties"
+
+Map<String, Object> git = tasks.getByName('generateGitProperties').getGeneratedProperties();
+def versionDetails = [
+        lastTag       : git["git.closest.tag.name"],
+        branchName    : git["git.branch"],
+        sha           : git["git.commit.id.abbrev"],
+        hash          : git["git.commit.id"],
+        tags          : git["git.tags"],
+        commitDistance: git["git.closest.tag.commit.count"],
+        dirty         : git["git.dirty"]
+]
+
+println "GIT"
+versionDetails.forEach {k,v -> println("  $k: $v")}
+
+ext.gitDetails = versionDetails
+
+if (!ext.has('branchName')) { // from -PbranchName=xxxx parameter
+    ext.branchName = versionDetails.branchName // from GIT
+}
+
+if (ext.branchName != null) {
+    // checking GIT branch name
+    def eq = ["dev", "main"]
+    def start = ["feature/", "hotfix/", "bugfix/", "release/", "PR-"]
+    if (!eq.contains(ext.branchName) && (start.find { ext.branchName.startsWith(it) }) == null) {
+        throw new GradleException("Unsupported branch name '" + branchName +
+                "', only ["+(eq+start).join(",")+"] are allowed!")
+    }
+}
+

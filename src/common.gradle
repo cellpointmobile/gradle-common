@@ -1,0 +1,121 @@
+/**
+ * Copyright (c) 2023. Cellpoint Digital
+ * www.cellpointdigital.com
+ *
+ */
+import org.apache.tools.ant.filters.ReplaceTokens
+
+import java.time.*
+import java.time.format.DateTimeFormatter
+import java.util.regex.*
+
+if (!ext.has('addonsPath')) {
+    throw new GradleException('addonsPath is not configured, please add: ext.addonsPath = "${projectDir}/addons/src";  to your root build.gradle file.')
+}
+
+ext {
+    def now = OffsetDateTime.now(ZoneOffset.UTC)
+    timestamp = now // assign ext.timestamp
+
+    // This function will apply build configurations required for java based project.
+    useJavaFeatures = { Project p, Map<String, Object> config = [:] ->
+        if (!p.plugins.hasPlugin('java')) {
+            throw new GradleException("useJavaFeatures() can be used in project with 'java' plugin connected.")
+        }
+
+        def javaVersion = (config.javaVersion ?: JavaVersion.current()) as JavaVersion
+
+        def applyIfExists = name -> {
+            File addon = p.rootProject.file(ext.addonsPath + '/' + name + '.gradle')
+            if (addon.exists() && !Boolean.FALSE.equals(config.get(name))) {
+                p.apply([from: addon])
+            }
+        }
+
+        applyIfExists('repositories')
+        applyIfExists('dependencies')
+        applyIfExists('test')
+        applyIfExists('spotbugs')
+        applyIfExists('jacoco')
+
+        p.compileJava.options.encoding = "UTF-8"
+        p.compileTestJava.options.encoding = "UTF-8"
+        p.java {
+            sourceCompatibility = javaVersion
+            targetCompatibility = javaVersion
+        }
+
+        if (p.plugins.hasPlugin('org.springframework.boot')) {
+            p.configurations {
+                compileOnly {
+                    extendsFrom annotationProcessor
+                }
+            }
+
+            p.bootJar {
+                archiveFileName = 'server.jar'
+            }
+        }
+
+
+        // calculate effective build version
+        def runNumber = ext.has('runNumber') ? ext.get('runNumber') : System.getenv('GITHUB_RUN_NUMBER')
+        def semver = prepareSemver(version, ext.gitDetails, ext.branchName, runNumber, now)
+        ext.buildSemver = semver
+
+        // replace tokens @build.version@, @build.semver@ and @build.timestamp@
+        if (!Boolean.FALSE.equals(config.get('processJavaResources'))) {
+            p.processResources {
+                filesMatching(['**/*.properties', '**/*.yaml']) {
+                    filter(ReplaceTokens, tokens: [
+                            'build.version'  : p.version,
+                            'build.semver'   : semver,
+                            'build.timestamp': now.toString() // UTC build time example: 2023-10-15T21:19:24.095308270Z
+                    ])
+                }
+            }
+        }
+
+    }
+
+}
+
+/**
+ * Create semver2 compatible string X.Y.Z[.R][-name]+[GIT_SHA-]yyMMddHHmm
+ *
+ * @param ver version of project (contains X.Y.0-*)
+ * @param git a map containing
+ *     .branchName (release/Nuuk, feature/CPD-NNNN-*, feature/CPD-NNNN-yyMMddHHmm )
+ *     .tags used for tags that can be sha-xxxxx, X.Y.Z-*
+ *     .sha
+ * @param branch an effective branch name
+ * @param runNumber CI run number
+ * @return not null string
+ */
+private static String prepareSemver(String ver, Map<String, String> git, String branch, String runNumber,
+                                    OffsetDateTime now) {
+    git = git ?: [:] // use empty map by default
+    // find X.Y.Z part from several sources
+    def cases = (git.tags ?: '').tokenize(',') + [branch, ver]
+    def pattern = ~/^(v\.?)?(\d+(\.\d+){2})($|[-_.].+$)/
+    def result = cases.stream().filter(s -> s != null)
+            .map(pattern::matcher).filter(Matcher::find).map(m -> m.group(2)).findFirst()
+            .orElseThrow(() -> new GradleException("Cannot determine the app version."))
+
+    // adding run number as 4th part
+    if (runNumber?.isNumber()) {
+        result += '.' + runNumber
+    }
+
+    // extracting a word after slash as suffix
+    def s = branch ?: git.branchName ?: ''
+    def releaseMatcher = (~/^.+\/([A-Za-z]\w{1,9}(-\d{2,6})?).*/).matcher(s)
+    if (releaseMatcher.find()) {
+        result += '-' + releaseMatcher.group(1).replace("-", "")
+    }
+
+    // add build-part
+    def buildTime = DateTimeFormatter.ofPattern('yyMMddHHmm').format(now)
+    result += '+' + (git.sha == null ? '' : git.sha + '-') + buildTime
+    return result.toLowerCase()
+}

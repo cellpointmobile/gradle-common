@@ -1,0 +1,38 @@
+/**
+ * Copyright (c) 2023. Cellpoint Digital
+ * www.cellpointdigital.com
+ *
+ */
+
+apply plugin: 'maven-publish'
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+def ext= project.ext
+def cpmArtifactoryWriteUsername = ext.has('cpmArtifactoryWriteUsername') ? ext.get('cpmArtifactoryWriteUsername') :
+        System.getenv("CPM_ARTIFACTORY_WRITE_USERNAME") ?: 'github'
+def cpmArtifactoryWritePassword = ext.has('cpmArtifactoryWritePassword') ? ext.get('cpmArtifactoryWritePassword') :
+        System.getenv("CPM_ARTIFACTORY_WRITE_PASSWORD") ?: 'jenkinspasswordplaceholder' // This is just a placeholder
+
+publishing {
+
+    // destination repositories
+    repositories {
+        mavenLocal() // to create 'publish___PublicationToMavenLocalRepository' tasks
+
+        maven {
+            name = 'CPM' // to create 'publish___PublicationToCPMRepository' tasks
+            credentials {
+                username cpmArtifactoryWriteUsername
+                password cpmArtifactoryWritePassword
+            }
+            def releasesRepoUrl = "https://repo.t.cpm.ninja/artifactory/libs-release-local"
+            def snapshotsRepoUrl = "https://repo.t.cpm.ninja/artifactory/libs-snapshot-local"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+
+}

@@ -1,0 +1,3 @@
+include ':java'
+
+rootProject.name = 'com.cellpointdigital.gradle-common'

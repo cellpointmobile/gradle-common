@@ -1,0 +1,36 @@
+/**
+ * Copyright (c) 2023. Cellpoint Digital
+ * www.cellpointdigital.com
+ *
+ */
+
+apply plugin: 'com.github.spotbugs'
+
+dependencies {
+    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.12.0'
+}
+
+spotbugs {
+
+    //While developing, it's OK to have a bug - heck that's why it's called development
+    if (version.endsWith('SNAPSHOT')) {
+        ignoreFailures = true
+    } else {
+        ignoreFailures = false
+        println "**************************************************** NOTE ****************************************************"
+        println "* When you on a SNAPSHOT version, this means your build will not fail on spotbug errors, only report them.   *"
+        println "* When you do a release version, spotbug errors will cause the build to fail! So don't ignore the report     *"
+        println "**************************************************************************************************************"
+    }
+
+    effort = "min"
+    // This selects what level of bugs to report: low means low priority issues will be reported
+    // (in addition to medium+high), which corresponds to warning about everything.
+    reportLevel = "low"
+
+    def excludes = new File("$project.projectDir/quality/spotbugs_exclude_filter.xml")
+    if (excludes.exists()) {
+        excludeFilter = excludes
+    }
+
+}

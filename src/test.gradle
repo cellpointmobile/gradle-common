@@ -1,0 +1,20 @@
+/**
+ * Copyright (c) 2023. Cellpoint Digital
+ * www.cellpointdigital.com
+ *
+ */
+
+test {
+    include '**/*Test.class'
+    exclude '**/*IntegrationTest.class'
+    exclude '**/*IT.class'
+    maxHeapSize = "2096M" //Spring can eat a lot of memory when injecting many mocks
+}
+
+// Usage: gradlew integrationTest
+tasks.register('integrationTest', Test) {
+    group = 'Verification'
+    description = 'Runs the integration tests'
+    include '**/*IntegrationTest.class'
+    include '**/*IT.class'
+}

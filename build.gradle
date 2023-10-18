@@ -1,0 +1,23 @@
+/**
+ * Copyright (c) 2023. Cellpoint Digital
+ * www.cellpointdigital.com
+ *
+ */
+
+plugins {
+    // declare versions of used plugins and attach them into gradle classpath
+    id 'com.github.spotbugs' version '5.0.14' apply false
+    id "com.gorylenko.gradle-git-properties" version "2.4.1" apply false
+    id 'com.github.spotbugs' version '5.0.14' apply false // remove if you don`t want to use spotbugs
+}
+
+ext {
+    cpmArtifactoryReadPassword = 'xxxxxxxxxxx' // for java-based only
+    addonsPath = "${projectDir}/src"
+}
+apply from: "${ext.addonsPath}/git.gradle"
+apply from: "${ext.addonsPath}/common.gradle"
+apply from: "${ext.addonsPath}/project_info.gradle" // optional
+apply from: "${ext.addonsPath}/compose.gradle" // optional
+
+

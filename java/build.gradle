@@ -1,0 +1,17 @@
+/**
+ * Copyright (c) 2023. Cellpoint Digital
+ * www.cellpointdigital.com
+ *
+ * Just for the gradle files testing
+ */
+
+plugins {
+    id 'java'
+}
+
+apply from: "${rootProject.projectDir}/src/dependencies.gradle"
+apply from: "${rootProject.projectDir}/src/jacoco.gradle"
+apply from: "${rootProject.projectDir}/src/liquibase.gradle"
+apply from: "${rootProject.projectDir}/src/repositories.gradle"
+apply from: "${rootProject.projectDir}/src/spotbugs.gradle"
+apply from: "${rootProject.projectDir}/src/test.gradle"

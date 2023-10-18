@@ -1,0 +1,37 @@
+/**
+ * Copyright (c) 2023. Cellpoint Digital
+ * www.cellpointdigital.com
+ *
+ */
+
+apply plugin: 'jacoco'
+
+jacocoTestReport {
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = file("${buildDir}/jacocoHtml")
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = 'CLASS'
+            excludes = ['*.entities.*']
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.5
+            }
+        }
+    }
+}
+
+test {
+    if(version.endsWith('SNAPSHOT')){
+        finalizedBy jacocoTestReport
+    } else {
+        finalizedBy jacocoTestReport, jacocoTestCoverageVerification
+    }
+}

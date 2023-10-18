@@ -1,0 +1,63 @@
+/**
+ * Copyright (c) 2023. Cellpoint Digital
+ * www.cellpointdigital.com
+ *
+ * Exposes tasks for working with local docker-compose
+ */
+
+tasks.register('up', Exec) {
+    group = 'docker-compose'
+    description = 'Builds docker containers and starts up it in docker-compose project.'
+    dependsOnIfRequested(it, 'clean', 'down')
+    dependsOnAllExisted(it, 'docker')
+    runDockerCompose(it, ['up', '-d'])
+}
+
+tasks.register('down', Exec) {
+    group = 'docker-compose'
+    description = 'Stops docker-compose project.'
+    runDockerCompose(it, ['down']);
+}
+
+tasks.register('restart', Exec) {
+    group = 'docker-compose'
+    description = 'Just restarts docker-compose project.'
+    dependsOn('down')
+    dependsOnIfRequested(it, 'clean', 'build', 'docker')
+    runDockerCompose(it, ['up', '-d']);
+}
+
+
+// get name of the docker-compose project from ".env" file or from root project name.
+private static String getComposeProjectName(Project rootProject) {
+    def envFile = rootProject.file("run/.env")
+    if (envFile.canRead()) {
+        for (String line : envFile.readLines()) {
+            def (key, value) = line.tokenize('=')
+            if (key != null && value != null && key.trim() == 'COMPOSE_PROJECT_NAME') {
+                return value
+            }
+        }
+    }
+    return rootProject.name.substring(rootProject.name.lastIndexOf('.') + 1)
+}
+
+private static void runDockerCompose(Exec exec, List<String> cmd) {
+    def rootProject = exec.project.rootProject
+    exec.workingDir(rootProject.file('run'))
+    def composeProjectName = getComposeProjectName(rootProject)
+    exec.commandLine(['docker-compose', '-p', composeProjectName, '-f', 'docker-compose.yml'] + cmd)
+}
+
+private static void dependsOnAllExisted(Task task, String taskName) {
+    def containers = task.project.rootProject.allprojects.tasks
+    def existed = containers.flatten().findAll { it.name == taskName }
+    println("Set '${task.name}' task to be depended on ${existed}")
+    task.dependsOn(existed)
+}
+
+private static void dependsOnIfRequested(Task task, String... checked) {
+    def taskNames = task.project.gradle.startParameter.taskNames
+    checked.findAll { taskNames.contains(it) }.forEach { dependsOnAllExisted(task, it) }
+}
+

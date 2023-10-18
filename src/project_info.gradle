@@ -1,0 +1,9 @@
+/**
+ * Copyright (c) 2023. Cellpoint Digital
+ * www.cellpointdigital.com
+ *
+ */
+
+println "Project: ${project.name}"
+println "  Version: ${project.version}"
+println "  ProjectDir: ${project.projectDir}"

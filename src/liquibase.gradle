@@ -1,0 +1,26 @@
+/**
+ * Copyright (c) 2023. Cellpoint Digital
+ * www.cellpointdigital.com
+ *
+ */
+
+def dockerBuildDir='build/docker'
+
+tasks.register('dockerPrepare', Copy) {
+    from("src/main/docker/Dockerfile")
+
+    from("src/main/sh/"){
+        into "app/scripts"
+    }
+
+    from("src/main/resources/") {
+        into "app/resources"
+    }
+
+    into(dockerBuildDir)
+}
+
+tasks.register('docker', Exec) {
+    dependsOn 'dockerPrepare'
+    commandLine 'docker', 'build', dockerBuildDir, '-t', "${rootProject.name}.${project.name}:latest"
+}

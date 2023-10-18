@@ -1,0 +1,5 @@
+# IDEs and editors
+.idea/
+*.iml
+.gradle
+build/
