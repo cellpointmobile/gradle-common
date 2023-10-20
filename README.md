@@ -32,7 +32,7 @@ export CPM_ARTIFACTORY_WRITE_PASSWORD='password'
 Used 'ext.' properties and variables:
 
 | ext. property | env variable | descrition                                                                                       | default                                             |
-|-|-|--------------------------------------------------------------------------------------------------|-----------------------------------------------------|
+|-|-|-|-|
 |cpmArtifactoryReadUsername|CPM_ARTIFACTORY_READ_USERNAME| username for readonly access to common maven repository.| 'cellpointmobileread'                               | 
 |cpmArtifactoryReadPassword|CPM_ARTIFACTORY_READ_PASSWORD| password for readonly access to common maven repository.| ''                                                  |
 |cpmArtifactoryWriteUsername|CPM_ARTIFACTORY_WRITE_USERNAME| username for write access to common maven repository.| 'github'                                            |
@@ -82,7 +82,7 @@ Add next lines
 
 ```groovy
 apply from: "${rootProject.ext.addonsPath}/project_info.gradle"
-apply from: "${rootProject.ext.addonsPath}/publishing.gradle"
+apply from: "${rootProject.ext.addonsPath}/liquibase.gradle"
 ```
 
 ## working with submodule
@@ -113,7 +113,7 @@ git rm addons
 "git submodule deinit" removes reference to "addons" submodule from .git/config file and removes content of "addons" directory.
 "git rm addons" removes "addons" directory from GIT-index. 
 
-- Notices:
+### Remarks
 
     According to the GitHub documentation, "git@github.com:" in submodule URL will be changed to
     "https://github.com/" automatically, if SSL certificate is not used, and in that case we must use PAT authorization.
