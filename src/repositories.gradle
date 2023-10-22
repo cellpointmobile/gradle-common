@@ -8,6 +8,7 @@ repositories {
     mavenLocal()
     mavenCentral()
 
+    def ext = rootProject.ext
     def cpmArtifactoryReadUsername = ext.has('cpmArtifactoryReadUsername') ? ext.get('cpmArtifactoryReadUsername') :
             System.getenv("CPM_ARTIFACTORY_READ_USERNAME") ?: 'cellpointmobileread'
     def cpmArtifactoryReadPassword = ext.has('cpmArtifactoryReadPassword') ? ext.get('cpmArtifactoryReadPassword') :

@@ -10,7 +10,7 @@ jacocoTestReport {
     reports {
         xml.required = false
         csv.required = false
-        html.outputLocation = file("${buildDir}/jacocoHtml")
+        html.outputLocation = file("build/jacocoHtml")
     }
 }
 

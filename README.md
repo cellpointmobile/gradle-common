@@ -107,7 +107,7 @@ git submodule update -f --remote addons
 
 ```bash
 git submodule deinit --force addons
-git rm addons
+git rm -f addons
 ```
 
 "git submodule deinit" removes reference to "addons" submodule from .git/config file and removes content of "addons" directory.
