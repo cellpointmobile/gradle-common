@@ -25,10 +25,16 @@ ext {
 
         def javaVersion = (config.javaVersion ?: JavaVersion.current()) as JavaVersion
 
+        // takes file from root/gradle, if not exists it takes common file
         def applyIfExists = name -> {
-            File addon = p.rootProject.file(ext.addonsPath + '/' + name + '.gradle')
-            if (addon.exists() && !Boolean.FALSE.equals(config.get(name))) {
-                p.apply([from: addon])
+            File overriding = p.rootProject.file('gradle/' + name + '.gradle')
+            if (overriding.exists()) {
+                p.apply([from: overriding])
+            } else {
+                File addon = p.rootProject.file(ext.addonsPath + '/' + name + '.gradle')
+                if (addon.exists() && !Boolean.FALSE.equals(config.get(name))) {
+                    p.apply([from: addon])
+                }
             }
         }
 

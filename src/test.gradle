@@ -2,19 +2,26 @@
  * Copyright (c) 2023. Cellpoint Digital
  * www.cellpointdigital.com
  *
+ * In order to run JUnit4 tests, add next line into your build.gradle dependencies:
+ *   testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:x.y.z'
  */
 
 test {
-    include '**/*Test.class'
-    exclude '**/*IntegrationTest.class'
-    exclude '**/*IT.class'
-    maxHeapSize = "2096M" //Spring can eat a lot of memory when injecting many mocks
+    useJUnitPlatform() {
+        excludeTags.addAll(['IT']) // in JUnit5 you can use 'org.junit.jupiter.api.Tag' annotation
+        excludes.addAll('**/*IntegrationTest.class', '**/*IT.class')
+    }
+    maxHeapSize = "2G"
 }
 
 // Usage: gradlew integrationTest
+// the integration tests may fail, look at integration test report.
 tasks.register('integrationTest', Test) {
     group = 'Verification'
     description = 'Runs the integration tests'
-    include '**/*IntegrationTest.class'
-    include '**/*IT.class'
+    useJUnitPlatform() {
+        includes.addAll('**/*IntegrationTest.class', '**/*IT.class')
+        includeTags.addAll(['IT'])
+    }
+    ignoreFailures = true
 }
