@@ -94,6 +94,7 @@ git submodule update -f addons
 
 ```bash
 git submodule update -f --remote addons
+git add addons
 ```
 
 - Removing submodule from the project:

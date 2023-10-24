@@ -37,8 +37,15 @@ if (ext.branchName != null) {
 }
 
 
-tasks.register('updateAddons', Exec) {
+tasks.register('updateAddons', Task) {
     group = 'git'
     description = 'Update "addons" submodule from remote origin server.'
-    commandLine('git', 'submodule', 'update', '-f', '--remote', 'addons')
+    doLast {
+        exec {
+            commandLine('git', 'submodule', 'update', '-f', '--remote', 'addons')
+        }
+        exec {
+            commandLine('git', 'add', 'addons')
+        }
+    }
 }
