@@ -53,9 +53,7 @@ plugins {
   id 'com.github.spotbugs' version '5.0.14' apply false // remove if you don`t want to use spotbugs  
 }
 
-ext {
-  addonsPath = "${projectDir}/addons/src"
-}
+ext.addonsPath = "${projectDir}/addons/src"
 apply from: "${addonsPath}/git.gradle"
 apply from: "${addonsPath}/common.gradle"
 apply from: "${addonsPath}/project_info.gradle" // optional
@@ -76,8 +74,8 @@ cpmArtifactoryReadPassword=xxxxxxxxxxx
 Add next lines
 
 ```groovy
-apply from: "${rootProject.ext.addonsPath}/project_info.gradle"
-apply from: "${rootProject.ext.addonsPath}/liquibase.gradle"
+apply from: "${addonsPath}/project_info.gradle"
+apply from: "${addonsPath}/liquibase.gradle"
 ```
 
 ## working with submodule
