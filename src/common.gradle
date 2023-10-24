@@ -9,8 +9,8 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 import java.util.regex.*
 
-if (!ext.has('addonsPath')) {
-    throw new GradleException('addonsPath is not configured, please add: ext.addonsPath = "${projectDir}/addons/src";  to your root build.gradle file.')
+if (findProperty('addonsPath') == null) {
+    throw new GradleException('"addonsPath" property is not configured, please add: ext.addonsPath = "${projectDir}/addons/src";  to your root build.gradle file.')
 }
 
 ext {
@@ -31,7 +31,7 @@ ext {
             if (overriding.exists()) {
                 p.apply([from: overriding])
             } else {
-                File addon = p.rootProject.file(ext.addonsPath + '/' + name + '.gradle')
+                File addon = p.rootProject.file(p.property('addonsPath') + '/' + name + '.gradle')
                 if (addon.exists() && !Boolean.FALSE.equals(config.get(name))) {
                     p.apply([from: addon])
                 }

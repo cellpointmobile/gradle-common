@@ -16,22 +16,13 @@ Do not use them in your project.
 
 These scripts MUST not have credentials in any form, because they locate in public GitHub repository. 
 
-To get credentials they use 'ext.' properties and environment variables.
-You need to define 'ext.' properties in **your build.gradle** files or set environment variables.
-'ext.' properties take precedence over env variables.
+To get credentials they use gradle properties and environment variables.
+You need to define properties in **your gradle.properties** file or set environment variables.
+Environment variables take precedence over properties.
 
-For example:
-```groovy
-ext.cpmArtifactoryReadPassword = 'super-long-password ;)'
-```
-or 
-```bash
-export CPM_ARTIFACTORY_WRITE_PASSWORD='password' 
-```
+Used properties and environment variables:
 
-Used 'ext.' properties and variables:
-
-| ext. property | env variable | descrition                                                                                       | default                                             |
+| property | env variable | descrition                                                                                       | default                                             |
 |-|-|-|-|
 |cpmArtifactoryReadUsername|CPM_ARTIFACTORY_READ_USERNAME| username for readonly access to common maven repository.| 'cellpointmobileread'                               | 
 |cpmArtifactoryReadPassword|CPM_ARTIFACTORY_READ_PASSWORD| password for readonly access to common maven repository.| ''                                                  |
@@ -63,15 +54,19 @@ plugins {
 }
 
 ext {
-  cpmArtifactoryReadPassword = 'xxxxxxxxxxx' // for java-based only
   addonsPath = "${projectDir}/addons/src"
 }
-apply from: "${ext.addonsPath}/git.gradle"
-apply from: "${ext.addonsPath}/common.gradle"
-apply from: "${ext.addonsPath}/project_info.gradle" // optional
-apply from: "${ext.addonsPath}/compose.gradle" // optional
+apply from: "${addonsPath}/git.gradle"
+apply from: "${addonsPath}/common.gradle"
+apply from: "${addonsPath}/project_info.gradle" // optional
+apply from: "${addonsPath}/compose.gradle" // optional
 ```
-   
+
+3) assign properties with credentials in gradle.properties file:
+
+```properties
+cpmArtifactoryReadPassword=xxxxxxxxxxx
+```
 
 ### for maven libraries
 

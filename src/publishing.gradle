@@ -11,11 +11,10 @@ java {
     withSourcesJar()
 }
 
-def ext= project.ext
-def cpmArtifactoryWriteUsername = ext.has('cpmArtifactoryWriteUsername') ? ext.get('cpmArtifactoryWriteUsername') :
-        System.getenv("CPM_ARTIFACTORY_WRITE_USERNAME") ?: 'github'
-def cpmArtifactoryWritePassword = ext.has('cpmArtifactoryWritePassword') ? ext.get('cpmArtifactoryWritePassword') :
-        System.getenv("CPM_ARTIFACTORY_WRITE_PASSWORD") ?: 'jenkinspasswordplaceholder' // This is just a placeholder
+String cpmArtifactoryWriteUsername = System.getenv("CPM_ARTIFACTORY_WRITE_USERNAME") ?:
+        findProperty('cpmArtifactoryWriteUsername') ?: 'github'
+String cpmArtifactoryWritePassword = System.getenv("CPM_ARTIFACTORY_WRITE_PASSWORD") ?:
+        findProperty('cpmArtifactoryWritePassword') ?: 'jenkinspasswordplaceholder' // This is just a placeholder
 
 publishing {
 
