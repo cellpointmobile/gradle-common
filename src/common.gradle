@@ -67,6 +67,7 @@ ext {
         // calculate effective build version
         def runNumber = ext.has('runNumber') ? ext.get('runNumber') : System.getenv('GITHUB_RUN_NUMBER')
         def semver = prepareSemver(version, ext.gitDetails, ext.branchName, runNumber, now)
+        println("The effective version of the application is '$semver'.")
         ext.buildSemver = semver
 
         // replace tokens @build.version@, @build.semver@ and @build.timestamp@
