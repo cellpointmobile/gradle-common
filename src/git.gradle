@@ -36,3 +36,9 @@ if (ext.branchName != null) {
     }
 }
 
+
+tasks.register('updateAddons', Exec) {
+    group = 'git'
+    description = 'Update "addons" submodule from remote origin server.'
+    commandLine('git', 'submodule', 'update', '-f', '--remote', 'addons')
+}
