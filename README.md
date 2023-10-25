@@ -66,17 +66,83 @@ apply from: "${addonsPath}/compose.gradle" // optional
 cpmArtifactoryReadPassword=xxxxxxxxxxx
 ```
 
-### for maven libraries
+4) If you use *cellpointdigital/github-reusable-workflows/.github/workflows/gradle-build.yml@main* common reusable flow,
+  please add **checkout_submodules: 'true'** to its configuration, example:
 
+```yaml
+jobs:
+   gradle-build-server:
+      uses: cellpointdigital/github-reusable-workflows/.github/workflows/gradle-build.yml@main
+      with:
+         java-version: 17
+         artifact_path: server/build/docker
+         artifact_name: server
+         gradle-arguments: :server:build :server:dockerPrepare --stacktrace
+         checkout_submodules: 'true'
+      secrets: inherit
+```
 
 ### for liquibase
 
-Add next lines
+replace liquibase/build.gradle with these only 2 lines:
 
 ```groovy
 apply from: "${addonsPath}/project_info.gradle"
 apply from: "${addonsPath}/liquibase.gradle"
 ```
+
+
+### for maven libraries
+
+Configuration for libraries is not fully completed and tested, but you can use all .gradle files.
+
+```groovy
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+test {
+    useJUnitPlatform()
+}
+
+configurations {
+    testImplementation.extendsFrom compileOnly
+}
+
+apply(from: rootProject.file('addons/repositories.gradle'))
+apply(from: rootProject.file('addons/jacoco.gradle'))
+apply(from: rootProject.file('addons/publishing.gradle'))
+
+publishing {
+
+    // getting the name for the maven artifact and publishing tasks:
+    def projName = project.name
+    int n = projName.lastIndexOf('.')
+    projName = projName.substring(n + 1)
+    def forTaskName=projName.replace("-","").toUpperCase()
+    publications.register(forTaskName, MavenPublication) {
+        // you may replace groupId, artifactId, version as you need
+        groupId = rootProject.name  
+        artifactId = projName
+        version = project.version
+        
+        from components.java
+    }
+
+}
+
+dependencies {
+    // any
+}
+```
+
+
 
 ## working with submodule
 
@@ -84,7 +150,7 @@ See:
 https://git-scm.com/book/en/v2/Git-Tools-Submodules
 https://stackoverflow.com/questions/1777854/how-can-i-specify-a-branch-tag-when-adding-a-git-submodule
 
-- If you have deleted or changed content of "addons" directory, you can restore the state with the command:
+- If you have deleted or changed content of "addons" directory, you can restore its state with the command:
 
 ```bash
 git submodule update -f addons 
@@ -93,26 +159,34 @@ git submodule update -f addons
 - Getting the latest state of addons replacing all changes in '/addons' folder that you may have done:
 
 ```bash
-git submodule update -f --remote addons
-git add addons
+git submodule update -f --remote addons  # (1) 
+git add addons  # (2)   
+```
+
+1) getting the latest state from "addons" repository.
+2) index git-sha of "addons" repository, to link current state of the project source-code with state of "addons" repository.
+
+You may use gradle task for that too: 
+```bash
+./gradlew updateAddons
 ```
 
 - Removing submodule from the project:
 
 ```bash
-git submodule deinit --force addons
-git rm -f addons
+git submodule deinit --force addons  # (1)
+git rm -f addons   # (2)
 ```
+1) removes reference to "addons" submodule from .git/config file and removes content of "addons" directory.
+2) removes "addons" directory from GIT-index.
 
-"git submodule deinit" removes reference to "addons" submodule from .git/config file and removes content of "addons" directory.
-"git rm addons" removes "addons" directory from GIT-index. 
 
 ### Remarks
 
-    According to the GitHub documentation, "git@github.com:" in submodule URL will be changed to
-    "https://github.com/" automatically, if SSL certificate is not used, and in that case we must use PAT authorization.
-    But because of standard GitHub credentials always have SSL client certificate, the GitHub workflow action 
-    cannot get to the repo. Public repositories in GitHub are accessible only by https protocol. 
+According to the GitHub documentation, "git@github.com:" in submodule URL will be changed to
+"https://github.com/" automatically, if SSL certificate is not used, and in that case we must use PAT authorization.
+But because of standard GitHub credentials always have SSL client certificate, the GitHub workflow action 
+cannot get to the repo. Public repositories in GitHub are accessible only by https protocol. 
 
 Show indexed submodule directories:
 ```bash
