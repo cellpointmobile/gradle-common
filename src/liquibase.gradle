@@ -20,7 +20,38 @@ tasks.register('dockerPrepare', Copy) {
     into(dockerBuildDir)
 }
 
+tasks.register('clean', Delete) {
+    delete layout.buildDirectory
+}
+
 tasks.register('docker', Exec) {
     dependsOn 'dockerPrepare'
+
+    //BEGIN: cache configuration
+    def shaFile = layout.buildDirectory.file("caching/sha.txt").get().getAsFile()
+    def makeShaFile = { File file ->
+        file.parentFile.mkdirs()
+        exec {
+            def cmd = "docker images --no-trunc --quiet ${rootProject.name}.${project.name}:latest >${file}"
+            commandLine 'sh', '-c', cmd
+        }
+    }
+
+    outputs.cacheIf { true }
+    inputs.dir(file(dockerBuildDir))
+            .withPropertyName("docker")
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+
+    outputs.upToDateWhen {
+        def currentSha = layout.buildDirectory.file("caching/current-sha.txt").get().getAsFile()
+        makeShaFile(currentSha)
+        return currentSha.exists() && shaFile.exists() && currentSha.getText() == shaFile.getText()
+    }
+
+    doLast {
+        makeShaFile(shaFile)
+    }
+    //END: cache configuration
+
     commandLine 'docker', 'build', dockerBuildDir, '-t', "${rootProject.name}.${project.name}:latest"
 }

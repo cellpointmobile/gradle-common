@@ -122,10 +122,8 @@ apply(from: rootProject.file('addons/publishing.gradle'))
 publishing {
 
     // getting the name for the maven artifact and publishing tasks:
-    def projName = project.name
-    int n = projName.lastIndexOf('.')
-    projName = projName.substring(n + 1)
-    def forTaskName=projName.replace("-","").toUpperCase()
+    def projName = project.name.substring(project.name.lastIndexOf('.') + 1)
+    def forTaskName = projName.replace("-","").toUpperCase()
     publications.register(forTaskName, MavenPublication) {
         // you may replace groupId, artifactId, version as you need
         groupId = rootProject.name  
