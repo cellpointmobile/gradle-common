@@ -8,8 +8,7 @@
 
 test {
     useJUnitPlatform() {
-        excludeTags.addAll(['IT']) // in JUnit5 you can use 'org.junit.jupiter.api.Tag' annotation
-        excludes.addAll('**/*IntegrationTest.class', '**/*IT.class')
+        includes.add('**/*Test.class')
     }
     maxHeapSize = "2G"
 }
@@ -20,8 +19,7 @@ tasks.register('integrationTest', Test) {
     group = 'Verification'
     description = 'Runs the integration tests'
     useJUnitPlatform() {
-        includes.addAll('**/*IntegrationTest.class', '**/*IT.class')
-        includeTags.addAll(['IT'])
+        includes.add('**/*IT.class')
     }
     ignoreFailures = true
 }
