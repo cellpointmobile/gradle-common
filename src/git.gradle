@@ -7,12 +7,13 @@
 apply plugin: "com.gorylenko.gradle-git-properties"
 
 Map<String, Object> git = tasks.getByName('generateGitProperties').getGeneratedProperties();
+def tags = (git["git.tags"] ?: '') as String
 def versionDetails = [
-        lastTag       : git["git.closest.tag.name"],
+        lastTag       : git["git.closest.tag.name"] ?: (tags.contains(',') ? tags.split(',')[0] : tags),
         branchName    : git["git.branch"],
         sha           : git["git.commit.id.abbrev"],
         hash          : git["git.commit.id"],
-        tags          : git["git.tags"],
+        tags          : tags,
         commitDistance: git["git.closest.tag.commit.count"],
         dirty         : git["git.dirty"]
 ]
