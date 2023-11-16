@@ -24,16 +24,24 @@ versionDetails.forEach {k,v -> println("  $k: $v")}
 ext.gitDetails = versionDetails
 
 if (!ext.has('branchName')) { // from -PbranchName=xxxx parameter
-    ext.branchName = versionDetails.branchName // from GIT
+    if (System.getenv('GITHUB_EVENT_NAME') == 'release') {
+        ext.branchName = 'release/' + System.getenv('GITHUB_REF_NAME')
+    } else {
+        ext.branchName = versionDetails.branchName // from "com.gorylenko.gradle-git-properties"
+    }
 }
 
 if (ext.branchName != null) {
     // checking GIT branch name
-    def eq = ["dev", "main"]
+    def eq = ["dev", "main", "HEAD"]
     def start = ["feature/", "hotfix/", "bugfix/", "release/", "PR-"]
-    if (!eq.contains(ext.branchName) && (start.find { ext.branchName.startsWith(it) }) == null) {
+    def end = ["/merge"]
+    if (!eq.contains(ext.branchName)
+            && (start.find { ext.branchName.startsWith(it) }) == null
+            && (end.find { ext.branchName.endsWith(it) }) == null)
+    {
         throw new GradleException("Unsupported branch name '" + branchName +
-                "', only ["+(eq+start).join(",")+"] are allowed!")
+                "', only ["+(eq+start+end).join(",")+"] are allowed!")
     }
 }
 
