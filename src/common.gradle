@@ -103,8 +103,9 @@ private static String prepareSemver(String ver, Map<String, String> git, String 
                                     OffsetDateTime now) {
     git = git ?: [:] // use empty map by default
     // find X.Y.Z part from several sources
-    def cases = (git.tags ?: '').tokenize(',') + [branch, ver]
-    def pattern = ~/^(v\.?)?(\d+(\.\d+){2})($|[-_.].+$)/
+    def tags = (git.tags ?: '').tokenize(',')
+    def cases = tags + [branch, ver]
+    def pattern = ~/^(v|v\.)?(\d+(\.\d+){2})($|[-_.].+$)/
     def result = cases.stream().filter(s -> s != null)
             .map(pattern::matcher).filter(Matcher::find).map(m -> m.group(2)).findFirst()
             .orElseThrow(() -> new GradleException("Cannot determine the app version."))
@@ -114,15 +115,32 @@ private static String prepareSemver(String ver, Map<String, String> git, String 
         result += '.' + runNumber
     }
 
-    // extracting a word after slash as suffix
-    def s = branch ?: git.branchName ?: ''
-    def releaseMatcher = (~/^.+\/([A-Za-z]\w{1,9}(-\d{2,6})?).*/).matcher(s)
-    if (releaseMatcher.find()) {
-        result += '-' + releaseMatcher.group(1).replace("-", "")
+    // find name part from several sources
+    def pattern1 = ~/((v|v\.)?(\d+(\.\d+){2,3}))/
+    def pattern2 = ~/^[-\s]*(.+)[-\s]*$/
+    def names = [branch] + (git.tags ?: '').tokenize(',')
+    def name = names.stream().map(s -> extractName(s,pattern1, pattern2))
+            .filter(s -> s != null && s.length() > 3).findFirst().orElse('')
+    if (!name.isEmpty()) {
+        result += '-' + name;
     }
 
     // add build-part
     def buildTime = DateTimeFormatter.ofPattern('yyMMddHHmm').format(now)
     result += '+' + (git.sha == null ? '' : git.sha + '-') + buildTime
     return result.toLowerCase()
+}
+
+private static String extractName(String branchOrTagName, Pattern pattern1, Pattern pattern2) {
+    if (branchOrTagName == null || branchOrTagName.isBlank()) {
+        return null
+    }
+    def last = branchOrTagName.lastIndexOf('/')
+    def s = branchOrTagName.substring(last + 1)
+    s = pattern1.matcher(s).replaceAll('')
+    def matcher = pattern2.matcher(s)
+    if (!matcher.find()) {
+        return null;
+    }
+    return matcher.group(1)
 }
