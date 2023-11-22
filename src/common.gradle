@@ -27,13 +27,18 @@ ext {
 
         // takes file from root/gradle, if not exists it takes common file
         def applyIfExists = name -> {
-            File overriding = p.rootProject.file('gradle/' + name + '.gradle')
+            File overriding = p.file('gradle/' + name + '.gradle')
             if (overriding.exists()) {
                 p.apply([from: overriding])
             } else {
-                File addon = p.rootProject.file(p.property('addonsPath') + '/' + name + '.gradle')
-                if (addon.exists() && !Boolean.FALSE.equals(config.get(name))) {
-                    p.apply([from: addon])
+                File overridingRoot = p.rootProject.file('gradle/' + name + '.gradle')
+                if (p != p.rootProject && overridingRoot.exists()) {
+                    p.apply([from: overridingRoot])
+                } else {
+                    File addon = p.rootProject.file(p.property('addonsPath') + '/' + name + '.gradle')
+                    if (addon.exists() && !Boolean.FALSE.equals(config.get(name))) {
+                        p.apply([from: addon])
+                    }
                 }
             }
         }
