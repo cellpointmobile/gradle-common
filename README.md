@@ -12,25 +12,18 @@ use .gradle files directly from 'src' directory.
 Current Gradle project and appropriate 'build.gradle' files are used for testing purposes here. 
 Do not use them in your project.   
 
-## Security
+## After checking out a branch that is already configured to use this submodule
 
-These scripts MUST not have credentials in any form, because they locate in public GitHub repository. 
+If the build cannot find gradle files from "addons" directory, you need to run this command:
 
-To get credentials they use gradle properties and environment variables.
-You need to define properties in **your gradle.properties** file or set environment variables.
-Environment variables take precedence over properties.
+```bash
+git submodule update --init
+```
 
-Used properties and environment variables:
-
-| property | env variable | descrition                                                                                       | default                                             |
-|-|-|-|-|
-|cpmArtifactoryReadUsername|CPM_ARTIFACTORY_READ_USERNAME| username for readonly access to common maven repository.| 'cellpointmobileread'                               | 
-|cpmArtifactoryReadPassword|CPM_ARTIFACTORY_READ_PASSWORD| password for readonly access to common maven repository.| ''                                                  |
-|cpmArtifactoryWriteUsername|CPM_ARTIFACTORY_WRITE_USERNAME| username for write access to common maven repository.| 'github'                                            |
-|cpmArtifactoryWritePassword|CPM_ARTIFACTORY_WRITE_PASSWORD| password for write access to common maven repository. <br/> This password usually assigned by CI | 'jenkinspasswordplaceholder' used as a placeholder |   
+This command will download appropriate GIT repository and place it into "addons" directory.
 
 
-## Usage
+## How to configure your project for using this submodule
 
 ### for all project types
 
@@ -139,6 +132,23 @@ dependencies {
     // any
 }
 ```
+
+## Security
+
+These scripts MUST not have credentials in any form, because they locate in public GitHub repository.
+
+To get credentials they use gradle properties and environment variables.
+You need to define properties in **your gradle.properties** file or set environment variables.
+Environment variables take precedence over properties.
+
+Used properties and environment variables:
+
+| property | env variable | descrition                                                                                       | default                                             |
+|-|-|-|-|
+|cpmArtifactoryReadUsername|CPM_ARTIFACTORY_READ_USERNAME| username for readonly access to common maven repository.| 'cellpointmobileread'                               | 
+|cpmArtifactoryReadPassword|CPM_ARTIFACTORY_READ_PASSWORD| password for readonly access to common maven repository.| ''                                                  |
+|cpmArtifactoryWriteUsername|CPM_ARTIFACTORY_WRITE_USERNAME| username for write access to common maven repository.| 'github'                                            |
+|cpmArtifactoryWritePassword|CPM_ARTIFACTORY_WRITE_PASSWORD| password for write access to common maven repository. <br/> This password usually assigned by CI | 'jenkinspasswordplaceholder' used as a placeholder |   
 
 
 
