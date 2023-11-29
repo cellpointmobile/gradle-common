@@ -31,9 +31,11 @@ tasks.register('docker', Exec) {
     def shaFile = layout.buildDirectory.file("caching/sha.txt").get().getAsFile()
     def makeShaFile = { File file ->
         file.parentFile.mkdirs()
-        exec {
-            def cmd = "docker images --no-trunc --quiet ${rootProject.name}.${project.name}:latest >${file}"
-            commandLine 'sh', '-c', cmd
+        try (BufferedOutputStream stream = file.newOutputStream()) {
+            exec {
+                setStandardOutput(stream)
+                commandLine 'docker', 'images', '--no-trunc', '--quiet', "${rootProject.name}.${project.name}:latest"
+            }
         }
     }
 
