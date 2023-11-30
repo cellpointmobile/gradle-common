@@ -29,14 +29,8 @@ tasks.register('docker', Exec) {
 
     //BEGIN: cache configuration
     def shaFile = layout.buildDirectory.file("caching/sha.txt").get().getAsFile()
-    def makeShaFile = { File file ->
-        file.parentFile.mkdirs()
-        try (BufferedOutputStream stream = file.newOutputStream()) {
-            exec {
-                setStandardOutput(stream)
-                commandLine 'docker', 'images', '--no-trunc', '--quiet', "${rootProject.name}.${project.name}:latest"
-            }
-        }
+    def getCurrentSha = { ->
+        "docker images --no-trunc --quiet ${rootProject.name}.${project.name}:latest".execute().getText()
     }
 
     outputs.cacheIf { true }
@@ -45,13 +39,12 @@ tasks.register('docker', Exec) {
             .withPathSensitivity(PathSensitivity.RELATIVE)
 
     outputs.upToDateWhen {
-        def currentSha = layout.buildDirectory.file("caching/current-sha.txt").get().getAsFile()
-        makeShaFile(currentSha)
-        return currentSha.exists() && shaFile.exists() && currentSha.getText() == shaFile.getText()
+        return shaFile.exists() && getCurrentSha() == shaFile.getText()
     }
 
     doLast {
-        makeShaFile(shaFile)
+        shaFile.parentFile.mkdirs()
+        shaFile.write(getCurrentSha())
     }
     //END: cache configuration
 
