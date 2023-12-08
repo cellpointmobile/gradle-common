@@ -12,6 +12,12 @@ jacocoTestReport {
         csv.required = false
         html.outputLocation = file("build/jacocoHtml")
     }
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: ["**/entities/**",])
+        }))
+    }
 }
 
 jacocoTestCoverageVerification {
