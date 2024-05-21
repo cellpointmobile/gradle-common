@@ -113,7 +113,7 @@ private static String prepareSemver(String ver, Map<String, String> git, String 
     def pattern = ~/^(v|v\.)?(\d+(\.\d+){2})($|[-_.].+$)/
     def result = cases.stream().filter(s -> s != null)
             .map(pattern::matcher).filter(Matcher::find).map(m -> m.group(2)).findFirst()
-            .orElseThrow(() -> new GradleException("Cannot determine the app version! You have to add GIT tag in format 'vX.Y.Z'."))
+            .orElseThrow(() -> new GradleException("Cannot determine the app version! You need set project version or add GIT tag in format 'X.Y.Z'."))
 
     // adding run number as 4th part
     if (runNumber?.isNumber()) {
