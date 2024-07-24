@@ -24,6 +24,7 @@ ext {
         }
 
         def javaVersion = (config.javaVersion ?: JavaVersion.current()) as JavaVersion
+        ext.javaVersion = javaVersion
 
         // takes file from root/gradle, if not exists it takes common file
         def applyIfExists = name -> {
